@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "BasicFloatingIp", "BasicFloatingIp\BasicFloatingIp.deployproj", "{31F78C33-070B-4B93-AF2A-D70A3189A3FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31F78C33-070B-4B93-AF2A-D70A3189A3FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31F78C33-070B-4B93-AF2A-D70A3189A3FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31F78C33-070B-4B93-AF2A-D70A3189A3FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31F78C33-070B-4B93-AF2A-D70A3189A3FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
