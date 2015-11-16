@@ -1,18 +1,23 @@
 ﻿{
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "virtualNetworkName": {
-            "value": null
-        },
-        "networkInterfaceName": {
-            "value": null
-        },
-        "loadBalancerName": {
-            "value": null
-        },
-        "adminUsername": {
-            "value": null
-        }
-    }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkName": {
+      "value": "ilbfloat"
+    },
+    "networkInterfaceName": {
+      "value": "ilbfloat"
+    },
+    "loadBalancerName": {
+      "value": "webload"
+    },
+    "adminUsername": {
+      "value": "interadmin"
+    },
+    "adminPassword": {
+      "value": "!!!!!"
+    },
+    "dnsNameForPublicIP": { "value": "mshack1003" },
+    "publicIPAddressType": { "value": "Dynamic" }
+  }
 }
