@@ -234,7 +234,7 @@
           {
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "subnet": {"id": "[variables('subnetRef')]"}
+              "subnet": { "id": "[variables('subnetRef')]" }
             },
             "name": "LoadBalancerFrontend"
           }
@@ -370,7 +370,7 @@
               "subnet": {
                 "id": "[variables('subnetRef')]"
               },
-              "publicIPAddress": {"id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('PublicIPName'))]"}
+              "publicIPAddress": { "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('PublicIPName'))]" }
             }
           }
         ]
