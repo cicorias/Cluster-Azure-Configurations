@@ -37,7 +37,6 @@
     <None Include="Templates\LoadBalancedVirtualMachine.param.dev.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Templates\RDP.json" />
     <None Include="Tools\AzCopy.exe" />
     <None Include="Tools\Microsoft.Data.Edm.dll">
       <Visible>False</Visible>

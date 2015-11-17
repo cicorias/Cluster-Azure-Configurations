@@ -94,20 +94,6 @@
         "description": "Type of public IP address"
       }
 
-    },
-    "JumpBoxName": {
-      "type": "string",
-      "minLength": 1
-    },
-    "JumpBoxWindowsOSVersion": {
-      "type": "string",
-      "defaultValue": "2012-R2-Datacenter",
-      "allowedValues": [
-        "2008-R2-SP1",
-        "2012-Datacenter",
-        "2012-R2-Datacenter",
-        "Windows-Server-Technical-Preview"
-      ]
     }
   },
   "variables": {
@@ -122,15 +108,7 @@
     "numberOfInstances": 2,
     "lbId": "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
     "vhdStorageName": "[concat('vhdStorage', uniqueString(resourceGroup().id))]",
-    "PublicIPName": "PublicIP",
-    "JumpBoxImagePublisher": "MicrosoftWindowsServer",
-    "JumpBoxImageOffer": "WindowsServer",
-    "JumpBoxOSDiskName": "JumpBoxOSDisk",
-    "JumpBoxVmSize": "Standard_D1",
-    "JumpBoxVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-    "JumpBoxSubnetRef": "[concat(variables('JumpBoxVnetID'), '/subnets/', variables('subnetName'))]",
-    "JumpBoxStorageAccountContainerName": "vhds",
-    "JumpBoxNicName": "[concat(parameters('JumpBoxName'), 'NetworkInterface')]"
+    "PublicIPName": "PublicIP"
   },
   "resources": [
     {
@@ -196,7 +174,8 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('PublicIPName'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -204,13 +183,18 @@
             "name": "[concat('ipconfig', copyindex())]",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[concat('10.0.2.', add(copyindex(),5))]",
+              "privateIPAddress": "[concat('10.0.2.', add(copyindex(),3))]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[concat(variables('lbId'), '/backendAddressPools/BackendPool1')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/RDP-VM', copyindex())]"
                 }
               ]
             }
@@ -233,8 +217,11 @@
         "frontendIPConfigurations": [
           {
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {"id": "[variables('subnetRef')]"}
+              "privateIPAddress": "10.0.2.1",
+              "privateIPAllocationMethod": "Static",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('PublicIPName'))]"
+              }
             },
             "name": "LoadBalancerFrontend"
           }
@@ -275,6 +262,31 @@
               "numberOfProbes": 2
             },
             "name": "lbprobe"
+          }
+        ],
+        "inboundNatRules": [
+          {
+            "name": "RDP-VM0",
+            "properties": {
+              "backendPort": 3389,
+              "frontendPort": 50000,
+              "protocol": "tcp",
+              "frontendIPConfiguration": {
+                "id": "[concat(variables('lbID'), '/frontendIPConfigurations/LoadBalancerFrontEnd') ]"
+              }
+            }
+          },
+          {
+            "name": "RDP-VM1",
+            "properties": {
+              "backendPort": 3389,
+              "frontendPort": 50001,
+              "protocol": "tcp",
+              "frontendIPConfiguration": {
+                "id": "[concat(variables('lbID'), '/frontendIPConfigurations/LoadBalancerFrontEnd') ]"
+              }
+            }
+
           }
         ]
       }
@@ -346,79 +358,6 @@
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
           "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
-        }
-      }
-    },
-    {
-      "name": "[variables('JumpBoxNicName')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-05-01-preview",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
-      ],
-      "tags": {
-        "displayName": "JumpBoxNic"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "10.0.2.99",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              },
-              "publicIPAddress": {"id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('PublicIPName'))]"}
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "[parameters('JumpBoxName')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-05-01-preview",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('JumpBoxNicName'))]"
-      ],
-      "tags": {
-        "displayName": "JumpBox"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('JumpBoxVmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[parameters('JumpBoxName')]",
-          "adminUsername": "[parameters('adminUserName')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('JumpBoxImagePublisher')]",
-            "offer": "[variables('JumpBoxImageOffer')]",
-            "sku": "[parameters('JumpBoxWindowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "JumpBoxOSDisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('JumpBoxStorageAccountContainerName'), '/', variables('JumpBoxOSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('JumpBoxNicName'))]"
-            }
-          ]
         }
       }
     }
